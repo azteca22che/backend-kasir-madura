@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.SignupRequest;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +17,7 @@ public class SignupController {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;  // Inject PasswordEncoder
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,22 +36,25 @@ public class SignupController {
         // Buat user baru dan simpan ke DB dengan password yang sudah di-hash
         User newUser = new User();
         newUser.setUsername(signupRequest.getUsername());
-        newUser.setPassword(passwordEncoder.encode(signupRequest.getPassword())); // hash password
+        newUser.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         newUser.setPhone(signupRequest.getPhone());
+
+        // 🔥 Tambahkan role di sini
+        newUser.setRole("ADMIN"); // atau "KASIR" tergantung endpoint
+
+        System.out.println("Role sebelum disimpan: " + newUser.getRole()); // Debug log (optional)
+
         userRepository.save(newUser);
 
         return new SignupResponse("Signup berhasil");
     }
 
     // Response class
+    @Getter
     public static class SignupResponse {
         private String message;
-
         public SignupResponse(String message) {
             this.message = message;
-        }
-        public String getMessage() {
-            return message;
         }
     }
 
@@ -62,13 +66,11 @@ public class SignupController {
     }
 
     // ErrorResponse class
+    @Getter
     public static class ErrorResponse {
-        private String message;
+        private final String message;
         public ErrorResponse(String message) {
             this.message = message;
-        }
-        public String getMessage() {
-            return message;
         }
     }
 

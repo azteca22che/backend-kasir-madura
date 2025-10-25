@@ -10,4 +10,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Digunakan saat login untuk mencari user berdasarkan username
     Optional<User> findByUsername(String username);
+    //untuk forgot password
+    Optional<User> findByPhone(String phone);
+
 }

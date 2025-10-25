@@ -4,6 +4,7 @@ import com.example.demo.model.Transaksi;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface TransaksiRepository extends JpaRepository<Transaksi, Long> {
      * @return list transaksi di rentang waktu tersebut
      */
     List<Transaksi> findByTanggalBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Transaksi> findByTokoIdAndTanggal(Long tokoId, LocalDate tanggal);
 }

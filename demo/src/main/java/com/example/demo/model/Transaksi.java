@@ -2,71 +2,57 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "transaksi")
 public class Transaksi {
 
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     private LocalDateTime tanggal = LocalDateTime.now();
 
+    @Setter
     private double totalBayar;
 
+    @Setter
     private String pembayaran;
 
-    @JsonManagedReference // Untuk menghindari infinite loop dengan ItemTransaksi
+    // 🔹 Relasi ke Toko
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "toko_id")
+    private Toko toko;
+
+    // 🔹 Relasi ke User (kasir)
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kasir_id")
+    private User kasir;
+
+    // 🔹 Relasi ke ItemTransaksi
+    @JsonManagedReference
     @OneToMany(mappedBy = "transaksi", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemTransaksi> items;
 
-    // Getter dan Setter
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getTanggal() {
-        return tanggal;
-    }
-
-    public void setTanggal(LocalDateTime tanggal) {
-        this.tanggal = tanggal;
-    }
-
-    public double getTotalBayar() {
-        return totalBayar;
-    }
-
-    public void setTotalBayar(double totalBayar) {
-        this.totalBayar = totalBayar;
-    }
-
-    public String getPembayaran() {
-        return pembayaran;
-    }
-
-    public void setPembayaran(String pembayaran) {
-        this.pembayaran = pembayaran;
-    }
-
-    public List<ItemTransaksi> getItems() {
-        return items;
-    }
+    // =================== GETTER SETTER ===================
 
     public void setItems(List<ItemTransaksi> items) {
         this.items = items;
-        // Relasi dua arah: pastikan setiap item punya referensi balik ke transaksi
         if (items != null) {
             for (ItemTransaksi item : items) {
                 item.setTransaksi(this);
             }
         }
     }
+
 }
