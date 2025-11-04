@@ -46,17 +46,21 @@ public class SignupController {
 
         userRepository.save(newUser);
 
-        return new SignupResponse("Signup berhasil");
+        return new SignupResponse(true,"Signup berhasil");
     }
 
     // Response class
     @Getter
     public static class SignupResponse {
+        private boolean success;
         private String message;
-        public SignupResponse(String message) {
+
+        public SignupResponse(boolean success, String message) {
+            this.success = success;
             this.message = message;
         }
     }
+
 
     // Exception BadRequest
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -68,11 +72,13 @@ public class SignupController {
     // ErrorResponse class
     @Getter
     public static class ErrorResponse {
+        private final boolean success = false;
         private final String message;
         public ErrorResponse(String message) {
             this.message = message;
         }
     }
+
 
     // Exception class
     public static class BadRequestException extends RuntimeException {
