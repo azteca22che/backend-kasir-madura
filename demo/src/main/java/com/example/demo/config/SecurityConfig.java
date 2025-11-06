@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,43 +19,40 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // REST API tanpa session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Endpoint publik (tanpa login)
+                        // endpoint publik
                         .requestMatchers(
                                 "/api/login",
                                 "/api/users/signup",
                                 "/api/auth/**",
                                 "/api/hello"
                         ).permitAll()
-
-                        // ✅ ADMIN-only endpoints
+                        // ADMIN-only
                         .requestMatchers("/api/toko/**").hasRole("ADMIN")
-                        .requestMatchers("/api/user/**").hasRole("ADMIN")
-
-                        // ✅ ADMIN & KASIR boleh akses
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        // ADMIN & KASIR
                         .requestMatchers("/api/produk/**", "/api/transaksi/**").hasAnyRole("ADMIN", "KASIR")
-
-                        // Selain itu wajib login
                         .anyRequest().authenticated()
                 );
+
+        // tambahkan JWT Filter sebelum filter UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ✅ Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Hilangkan prefix "ROLE_" agar Spring Security cocok dengan role di DB (ADMIN / KASIR)
+    // hilangkan prefix ROLE_
     @Bean
     GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults(""); // hilangkan "ROLE_" prefix
+        return new GrantedAuthorityDefaults("");
     }
 
-    // ✅ CORS supaya Flutter bisa akses API
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
