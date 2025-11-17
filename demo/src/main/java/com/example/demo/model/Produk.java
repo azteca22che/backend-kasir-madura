@@ -18,6 +18,8 @@ public class Produk {
     private String nama;
     private int stok;
     private String satuan;
+    private String imageName;
+
 
     @Column(name = "harga_jual")
     private double hargaJual; // ubah nama field dan mapping ke kolom harga_jual

@@ -34,7 +34,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("ADMIN")
 
                         // ✅ ADMIN & KASIR boleh akses
-                        .requestMatchers("/api/produk/**", "/api/transaksi/**").hasAnyRole("ADMIN", "KASIR")
+                        //.requestMatchers("/api/produk/**", "/api/transaksi/**").hasAnyRole("ADMIN", "KASIR")
+                        .requestMatchers("/api/produk/**").permitAll()
+
 
                         // Selain itu wajib login
                         .anyRequest().authenticated()
