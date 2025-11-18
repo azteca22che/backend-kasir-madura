@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
 @Entity
 public class Toko {
     @Id
@@ -14,19 +15,36 @@ public class Toko {
     @JoinColumn(name = "kasir_id")
     private User kasir;
 
-    public void getClass(Object namaToko) {
+    // Getter & Setter
+    public Long getId() {
+        return id;
     }
 
-    public void setAlamat(Object alamat) {
-    }
-
-    public void setKasir(User user) {
-
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNamaToko() {
-        return "";
+        return namaToko;
     }
 
-    // Getter & Setter
+    public void setNamaToko(String namaToko) {
+        this.namaToko = namaToko;
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
+    }
+
+    public User getKasir() {
+        return kasir;
+    }
+
+    public void setKasir(User kasir) {
+        this.kasir = kasir;
+    }
 }

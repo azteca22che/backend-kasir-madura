@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -16,48 +17,45 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // REST API tanpa session
+
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ Endpoint publik (tanpa login)
                         .requestMatchers(
                                 "/api/login",
-                                "/api/users/signup",
-                                "/api/signup",
                                 "/api/auth/**",
+                                "/api/users/signup",
                                 "/api/hello"
                         ).permitAll()
 
-                        // ✅ ADMIN-only endpoints
+                        // ADMIN Only
                         .requestMatchers("/api/toko/**").hasRole("ADMIN")
-                        .requestMatchers("/api/user/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // ✅ ADMIN & KASIR boleh akses
-                        //.requestMatchers("/api/produk/**", "/api/transaksi/**").hasAnyRole("ADMIN", "KASIR")
-                        .requestMatchers("/api/produk/**").permitAll()
+                        // ADMIN & KASIR
+                        .requestMatchers("/api/produk/**", "/api/transaksi/**")
+                        .hasAnyRole("ADMIN", "KASIR")
 
-
-                        // Selain itu wajib login
                         .anyRequest().authenticated()
                 );
+
+        // Tambahkan JWT Filter
+        http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ✅ Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Hilangkan prefix "ROLE_" agar Spring Security cocok dengan role di DB (ADMIN / KASIR)
+    // Tidak gunakan prefix ROLE_
     @Bean
     GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults(""); // hilangkan "ROLE_" prefix
+        return new GrantedAuthorityDefaults("");
     }
 
-    // ✅ CORS supaya Flutter bisa akses API
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -65,7 +63,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("*")
                         .allowedHeaders("*");
             }
         };

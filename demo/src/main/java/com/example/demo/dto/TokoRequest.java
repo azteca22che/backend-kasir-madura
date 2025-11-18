@@ -1,20 +1,12 @@
 package com.example.demo.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class TokoRequest {
     private String namaToko;
     private String alamat;
-    private Long kasirId; // id kasir yang sudah dipilih
-
-    public Long getKasirId() {
-        return 0L;
-    }
-
-    public Object getNamaToko() {
-        return null;
-    }
-
-    public Object getAlamat() {
-        return null;
-    }
-
-    // Getter & Setter
+    private Long kasirId;
 }

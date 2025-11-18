@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -52,23 +53,23 @@ public class AuthController {
         long expirationTime = 1000 * 60 * 60 * 24; // 24 jam
         SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
+        // 🔹 Tambahkan claim role
         String jwtToken = Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("roles", List.of(user.getRole())) // ⬅️ pakai plural + array
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
+
         return new LoginResponse(jwtToken, user.getRole(), "Login berhasil");
     }
 
     // ==================== FORGOT PASSWORD ====================
-
-    // 1️⃣ Kirim OTP ke nomor HP
     @PostMapping("/auth/send-otp")
     public ResponseEntity<ApiResponse> sendOtp(@RequestBody Map<String, String> request) {
         String phone = request.get("phone");
-
         if (phone == null || phone.isEmpty()) {
             return ResponseEntity.badRequest().body(new ApiResponse("Nomor HP wajib diisi", null));
         }
@@ -80,14 +81,11 @@ public class AuthController {
         }
 
         String otp = otpService.generateAndSaveOtp(phone);
-
-        // ⚠️ Di production, jangan tampilkan OTP di log
         System.out.println("OTP dikirim ke " + phone + ": " + otp);
 
         return ResponseEntity.ok(new ApiResponse("Kode OTP telah dikirim ke nomor " + phone, null));
     }
 
-    // 2️⃣ Verifikasi OTP
     @PostMapping("/auth/verify-otp")
     public ResponseEntity<ApiResponse> verifyOtp(@RequestBody Map<String, String> request) {
         String phone = request.get("phone");
@@ -98,7 +96,7 @@ public class AuthController {
         }
 
         if (otpService.verifyOtp(phone, otp)) {
-            otpService.deleteOtp(phone); // hapus OTP setelah berhasil diverifikasi
+            otpService.deleteOtp(phone);
             return ResponseEntity.ok(new ApiResponse("OTP valid", null));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -106,7 +104,6 @@ public class AuthController {
         }
     }
 
-    // 3️⃣ Reset password
     @PostMapping("/auth/reset-password")
     public ResponseEntity<ApiResponse> resetPassword(@RequestBody Map<String, String> request) {
         String phone = request.get("phone");
