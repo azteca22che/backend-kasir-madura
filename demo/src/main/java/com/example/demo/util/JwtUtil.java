@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class JwtUtil {
 
-    private static final String SECRET = "mySuperSecretKey12345678901234567"; // minimal 32 byte
+    private static final String SECRET = "mySuperSecretKey12345678901234567"; // >=32 byte
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24 jam
 
     private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
@@ -16,7 +16,7 @@ public class JwtUtil {
     public static String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("role", role)
+                .claim("role", role) // hanya 1 claim ini
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(KEY, SignatureAlgorithm.HS256)

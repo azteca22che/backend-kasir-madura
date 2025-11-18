@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -55,11 +56,12 @@ public class AuthController {
         // 🔹 Tambahkan claim role
         String jwtToken = Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole()) // role user disertakan di JWT
+                .claim("roles", List.of(user.getRole())) // ⬅️ pakai plural + array
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
 
         return new LoginResponse(jwtToken, user.getRole(), "Login berhasil");
     }

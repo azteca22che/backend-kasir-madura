@@ -17,26 +17,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+        http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // endpoint publik
                         .requestMatchers(
                                 "/api/login",
-                                "/api/users/signup",
                                 "/api/auth/**",
+                                "/api/users/signup",
                                 "/api/hello"
                         ).permitAll()
-                        // ADMIN-only
+
+                        // ADMIN Only
                         .requestMatchers("/api/toko/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+
                         // ADMIN & KASIR
-                        .requestMatchers("/api/produk/**", "/api/transaksi/**").hasAnyRole("ADMIN", "KASIR")
+                        .requestMatchers("/api/produk/**", "/api/transaksi/**")
+                        .hasAnyRole("ADMIN", "KASIR")
+
                         .anyRequest().authenticated()
                 );
 
-        // tambahkan JWT Filter sebelum filter UsernamePasswordAuthenticationFilter
+        // Tambahkan JWT Filter
         http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -47,7 +50,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // hilangkan prefix ROLE_
+    // Tidak gunakan prefix ROLE_
     @Bean
     GrantedAuthorityDefaults grantedAuthorityDefaults() {
         return new GrantedAuthorityDefaults("");
@@ -60,7 +63,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("*")
                         .allowedHeaders("*");
             }
         };
