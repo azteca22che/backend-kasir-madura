@@ -25,7 +25,9 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/auth/**",
                                 "/api/users/signup",
-                                "/api/hello"
+                                "/api/hello",
+
+                                "/api/produk/gambar/**"
                         ).permitAll()
 
                         // ADMIN Only

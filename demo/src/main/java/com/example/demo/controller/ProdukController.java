@@ -112,11 +112,13 @@ public class ProdukController {
         }
 
         byte[] imageBytes = Files.readAllBytes(img.toPath());
+        String mimeType = Files.probeContentType(img.toPath());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                .header(HttpHeaders.CONTENT_TYPE, mimeType)
                 .body(imageBytes);
     }
+
 
     // ------------------------------
 // DELETE produk
