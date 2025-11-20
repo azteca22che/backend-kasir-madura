@@ -26,20 +26,23 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/users/signup",
                                 "/api/hello",
-
                                 "/api/produk/gambar/**"
                         ).permitAll()
+
+                        // 🔥 Izinkan GET produk tanpa login
+                        .requestMatchers("/api/produk", "/api/produk/").permitAll()
 
                         // ADMIN Only
                         .requestMatchers("/api/toko/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                        // ADMIN & KASIR
+                        // ADMIN & KASIR untuk add, update, delete
                         .requestMatchers("/api/produk/**", "/api/transaksi/**")
                         .hasAnyRole("ADMIN", "KASIR")
 
                         .anyRequest().authenticated()
                 );
+
 
         // Tambahkan JWT Filter
         http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
